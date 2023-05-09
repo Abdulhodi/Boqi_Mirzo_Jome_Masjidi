@@ -44,7 +44,7 @@ async def start(message: types.Message):
         await message.answer(f"Assalomu alaykum <b>{username}</b> botimizdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
 
 
-@dp.callback_query_handler(CommandStart())
+@dp.callback_query_handler()
 async def check_sub(callback : types.CallbackQuery):
     check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=callback.message.from_user.id)
 
