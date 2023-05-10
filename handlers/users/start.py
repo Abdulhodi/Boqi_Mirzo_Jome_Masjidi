@@ -46,12 +46,13 @@ async def start(message: types.Message):
 
 @dp.callback_query_handler()
 async def check_sub(callback : types.CallbackQuery):
-    check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=callback.message.from_user.id)
+    if callback.data == "subdone":
+       check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=callback.message.from_user.id)
 
-    if check_sub_channel['status'] != 'left':
-        await callback.message.answer("Kanalimizga a'zo bo'lganingiz uchun rahmat! :) 😊😊😊", reply_markup=home)
-    else:
-        await callback.message.answer("Botdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
+       if check_sub_channel['status'] != 'left':
+          await callback.message.answer("Kanalimizga a'zo bo'lganingiz uchun rahmat! :) 😊😊😊", reply_markup=home)
+       else:
+          await callback.message.answer("Botdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
 
 def register_start_py(dp: Dispatcher):
     dp.register_message_handler(home, commands=['start'])
