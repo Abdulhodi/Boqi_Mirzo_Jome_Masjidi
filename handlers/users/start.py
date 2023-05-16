@@ -12,8 +12,60 @@ from aiogram import Bot,Dispatcher,executor,types
 from aiogram.types import InlineKeyboardButton,InlineKeyboardMarkup
 from data.config import BOT_TOKEN
 from keyboards.default.menu import *
+from aiogram.dispatcher.middlewares import BaseMiddleware
+from aiogram.dispatcher.handler import CancelHandler
+from data.config import CHANNELS
+# from handlers.users.check_sub import check
 
+import logging
+from aiogram import Bot, Dispatcher, executor,types
+from aiogram.dispatcher.filters import Command, CommandStart
+from asyncio import sleep
 
+from data.config import BOT_TOKEN
+
+############################## Majburiy obuna ishlayapti ###############################
+
+logging.basicConfig(level=logging.INFO)
+
+buttons = types.InlineKeyboardMarkup()
+btn = types.InlineKeyboardButton(text="➕Kanal", url="https://t.me/Boqi_Mirzo_Jome_Masjidi")
+confirm_btn = types.InlineKeyboardButton(text="✅A'zo bo'ldim", callback_data="confirm")
+
+buttons.add(btn)
+buttons.add(confirm_btn)
+
+bot = Bot(token=BOT_TOKEN)
+# dp = Dispatcher(bot)
+
+channel_id = "@Boqi_Mirzo_Jome_Masjidi"
+
+def check_sub_channel(chat_mumber):
+    if chat_mumber['status'] != 'left':
+        return True
+    else:
+        return False
+
+@dp.message_handler()
+async def send_welcome(message: types.Message):
+    # user_id = message.from_user.username
+    # username = message.from_user.first_name
+    user=message.from_user.first_name
+    chat_id = message.from_user.id
+
+    if check_sub_channel(await bot.get_chat_member(chat_id=channel_id, user_id=message.from_user.id)):
+        await message.reply(f"Assalomu alaykum {user}")
+    else:
+        await bot.send_message(chat_id, f"Assalomu alaykum {user}\nbotimizdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!.",reply_markup=buttons)
+
+@dp.callback_query_handler(text='confirm')
+async def confirm(call: types.CallbackQuery):
+    user = call.from_user.first_name
+    if check_sub_channel(await bot.get_chat_member(chat_id=channel_id, user_id=call.from_user.id)):
+        await call.message.delete()
+        await call.message.answer(f"Assalomu alaykum {user}\nKanalimizga obuna bo'lganingiz uchun rahmat!.😊😊😊",reply_markup=home)
+    else:
+        await call.message.answer(f"Kechirasiz lekin kanalimizga hali obuna bo'lmadingiz botdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!.",reply_markup=buttons)
 
 # async def start_bot(message: types.Message):
 #     user_id = message.from_user.id
@@ -21,45 +73,76 @@ from keyboards.default.menu import *
 #
 #     await message.answer(f'Salom <b>{username}</b>')
 
-bot = Bot(token=BOT_TOKEN)
-# dp = Dispatcher(bot)
+# matn = "Botimizdan foydalanish uchun rasmiy kanalimizga <b>obuna bo'ling</b> va <b>Tekshirish</b> tugmasini bosing."
+# @dp.message_handler(commands=['start'])
+# class Asosiy(BaseMiddleware):
+#     async def on_pre_process_update(self,xabar:types.Update,data:dict):
+#         if xabar.message:
+#             user_id = xabar.message.from_user.id
+#         elif xabar.callback_query:
+#             user_id = xabar.callback_query.from_user.id
+#         else:
+#             return
+#         buttons = InlineKeyboardMarkup(row_width=1)
+#         dastlabki = True
+#         for k in CHANNELS:
+#             holat = await check(user_id=user_id,kanal_id=k)
+#             if holat==1:
+#                 channels = await bot.get_chat(k)
+#                 buttons.insert(InlineKeyboardButton(text=f"✅ {channels.title}", url=f"{await channels.export_invite_link()}"))
+#             elif holat==0:
+#                 channels = await bot.get_chat(k)
+#                 buttons.insert(InlineKeyboardButton(text=f"❌ {channels.title}", url=f"{await channels.export_invite_link()}"))
+#             dastlabki *= holat
+#         if not dastlabki:
+#             buttons.insert(InlineKeyboardButton(text="🔄 Tekshirish",callback_data="check_subsciption"))
+#             await bot.send_message(chat_id=user_id,text=matn,disable_web_page_preview=True,
+#                                     reply_markup=buttons)
+#             raise CancelHandler()
 
-channel_id = '-1001958376816'
+############################ Majburiy obuna #######################################
 
-def inline_buttons():
-    channel_url = InlineKeyboardButton('Kanalimiz', url='https://t.me/Boqi_Mirzo_Jome_Masjidi')
-    check = InlineKeyboardButton("✅A'zo bo'ldim", callback_data='subdone')
-    markup = InlineKeyboardMarkup(row_width=1).add(channel_url, check)
-    return markup
-
-@dp.message_handler(CommandStart())
-async def start(message: types.Message):
-    check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=message.from_user.id)
-    user_id = message.from_user.username
-    username = message.from_user.first_name
-
-    if check_sub_channel['status'] != 'left':
-        await message.answer(f"Assalomu alaykum <b>{username}</b> botimizga xush kelibsiz!",reply_markup=home)
-    else:
-        await message.answer(f"Assalomu alaykum <b>{username}</b> botimizdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
-
-
-@dp.callback_query_handler()
-async def check_sub(callback : types.CallbackQuery):
-    if callback.data == "subdone":
-        check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=callback.message.from_user.id)
-
-        if check_sub_channel['status'] != 'left':
-            await callback.message.answer("Kanalimizga a'zo bo'lganingiz uchun rahmat! :) 😊😊😊", reply_markup=home)
-        else:
-            await callback.message.answer("Botdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
+# # bot = Bot(token=BOT_TOKEN)
+# # dp = Dispatcher(bot)
+# #
+# # channel_id = '-1001958376816'
+# # channel_id1 = '-1001784047019'
+# #
+# # def inline_buttons():
+# #   channel_url = InlineKeyboardButton("Kanalimiz", url='https://t.me/Boqi_Mirzo_Jome_Masjidi')
+# #   channel_url1 = InlineKeyboardButton("Guruhimiz", url='https://t.me/Boqi_Mirzo_Jome_Masjidi_Muhokama')
+#     check = InlineKeyboardButton("✅A'zo bo'ldim", callback_data='subdone')
+#     markup = InlineKeyboardMarkup(row_width=1).add(channel_url, check)
+#     return markup
+#
+# @dp.message_handler()
+# async def start(message: types.Message):
+#     check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=message.from_user.id)
+#     # check_sub_channel1 = await bot.get_chat_member(chat_id=channel_id1, user_id=message.from_user.id)
+#     user_id = message.from_user.username
+#     username = message.from_user.first_name
+#
+#     if check_sub_channel['status'] != 'left':
+#         await message.answer(f"Assalomu alaykum <b>{username}</b> botimizga xush kelibsiz!",reply_markup=home)
+#     else:
+#         await message.answer(f"Assalomu alaykum <b>{username}</b> botimizdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
+#
+#
+# @dp.callback_query_handler()
+# async def check_sub(callback : types.CallbackQuery):
+#     check_sub_channel = await bot.get_chat_member(chat_id=channel_id, user_id=callback.message.from_user.id)
+#
+#     if check_sub_channel['status'] != 'left':
+#         await callback.message.answer("Kanalimizga a'zo bo'lganingiz uchun rahmat! :) 😊😊😊", reply_markup=home)
+#     else:
+#         await callback.message.answer("Botdan foydalanish uchun iltimos kanalimizga a'zo bo'ling!", reply_markup=inline_buttons())
 
 def register_start_py(dp: Dispatcher):
-    dp.register_message_handler(home, commands=['start'])
+    dp.register_message_handler(dp, commands=['start'])
 
-@dp.message_handler(text="Frontend darslari")
-async def bot_echo(message: types.Message):
-    await message.answer(message.text,reply_markup=fronted)
+# @dp.message_handler(text="Frontend darslari")
+# async def bot_echo(message: types.Message):
+#    await message.answer(message.text,reply_markup=fronted)
 
 # @dp.message_handler(text="🕋Namoz vaqti")
 # async def bot_echo(message: types.Message):
