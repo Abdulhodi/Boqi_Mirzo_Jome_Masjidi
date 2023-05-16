@@ -14,7 +14,7 @@ from data.config import BOT_TOKEN
 from keyboards.default.menu import *
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.dispatcher.handler import CancelHandler
-from data.config import CHANNELS
+# from data.config import CHANNELS
 # from handlers.users.check_sub import check
 
 import logging
